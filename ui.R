@@ -10,12 +10,12 @@ dashboardPage(
         choices=c("Country","Company")
       )
     ),
-    conditionalPanel(condition = output$tabName == "Country",
+    conditionalPanel(condition = 'input.tabselected == "Country"',
                      selectizeInput(inputId="country_long",
                                     label='country',
                                     choice= unique(powerplants$country_long))
-                     ),
-    conditionalPanel(condition = output$tabName == "Company",
+    ),
+    conditionalPanel(condition = 'input.tabselected == "Company"',
                      selectizeInput(inputId="owner",
                                     label='company',
                                     choice= unique(powerplants$owner))

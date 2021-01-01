@@ -12,6 +12,4 @@ function(input, output){
     powerplantbycompany = powerplants %>% filter(owner == input$owner)
   })
   
-  output$tabName = input$tabselected
-  
 }

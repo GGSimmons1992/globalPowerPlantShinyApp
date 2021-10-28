@@ -1,0 +1,1 @@
+powerplants=read.csv('global_power_plant_database.csv')

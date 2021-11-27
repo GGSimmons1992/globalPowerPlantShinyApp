@@ -7,48 +7,63 @@ data load
 library(dplyr)
 library(data.table)
 library(ggplot2)
+library(leaflet)
+library(reshape2)
 powerplants=read.csv('global_power_plant_database.csv')
+
+powerplantsWithYearData = powerplants %>% group_by(country_long) %>% summarise(proportionWithData = 1 - mean(is.na(commissioning_year))) %>% filter(proportionWithData > .8)
+
+powerplants = powerplants %>% filter(country_long %in% powerplantsWithYearData$country_long)
+
 powerplants[is.na(powerplants)] = 0
-powerplantsAfghanistan = powerplants %>% filter(country_long == "Afghanistan")
+powerplantsUSA = powerplants %>% filter(country_long == "United States of America")
 ```
 Data prep
 ```{r}
-powerplantsAfghanistanFuel = powerplantsAfghanistan %>% group_by(primary_fuel) 
+powerplantsUSAFuel = powerplantsUSA %>% group_by(primary_fuel) 
 
-powerplantsAfghanistanFuelYear = powerplantsAfghanistanFuel %>% summarise(energy2013 = 0.5* (sum(generation_gwh_2013) + sum(estimated_generation_gwh_2013)),
+powerplantsUSAFuelYear = powerplantsUSAFuel %>% summarise(energy2013 = 0.5* (sum(generation_gwh_2013) + sum(estimated_generation_gwh_2013)),
           energy2014 = 0.5* (sum(generation_gwh_2014) + sum(estimated_generation_gwh_2014)),
           energy2015 = 0.5* (sum(generation_gwh_2015) + sum(estimated_generation_gwh_2015)),
           energy2016 = 0.5* (sum(generation_gwh_2016) + sum(estimated_generation_gwh_2016)),
           energy2017 = 0.5* (sum(generation_gwh_2017) + sum(estimated_generation_gwh_2017)),
           )
 
-totalEnergy = powerplantsAfghanistanFuelYear %>% mutate(total = energy2013+ energy2014 +energy2015 + energy2016 + energy2017)
+totalEnergy = powerplantsUSAFuelYear %>% mutate(total = energy2013+ energy2014 +energy2015 + energy2016 + energy2017)
 
-transposePowerplantsAfghanistanFuelYear = transpose(powerplantsAfghanistanFuelYear)
-transposePowerplantsAfghanistanFuelYear$V4 = c("Year",2013,2014,2015,2016,2017,)
-names(transposePowerplantsAfghanistanFuelYear) = transposePowerplantsAfghanistanFuelYear[1,]
+transposePowerplantsUSAFuelYear = transpose(powerplantsUSAFuelYear)
+transposePowerplantsUSAFuelYear$V4 = c("Year",2013,2014,2015,2016,2017)
+names(transposePowerplantsUSAFuelYear) = transposePowerplantsUSAFuelYear[1,]
 ```
 
 map
 ```{r}
-
+leaflet(powerplantsUSA %>% filter(primary_fuel == "Wind")) %>% addTiles() %>% addMarkers(~longitude,~latitude,popup= ~primary_fuel,label= ~primary_fuel)
 ```
 
 pie chart
 ```{r}
-ggplot(totalEnergy,aes(x="",y=total,fill=primary_fuel)) + geom_bar(width=1,stat="identity") + coord_polar("y",start=0) + scale_fill_manual(values=c("green","blue","red"))
+ggplot(totalEnergy,aes(x="",y=total,fill=primary_fuel)) + geom_bar(width=1,stat="identity") + coord_polar("y",start=0)
 ```
 
 energy produced
 ```{r}
 
-preplotdf=transposePowerplantsAfghanistanFuelYear[-1,]
-ggplot(preplotdf, aes(x=Year,group=1)) + geom_line(aes(y = Gas),color="green") + geom_line(aes(y=Hydro),color="blue") + geom_line(aes(y=Solar),color="red") + ylab("Energy Produce MWH")
+preplotdf=transposePowerplantsUSAFuelYear[-1,]
+data_long = melt(preplotdf, id="Year")
+data_long$value
 
+lineplot = ggplot(data_long, aes(x=Year,y= value, color= variable,group=1)) + ylab("Energy Produce MWH") + xlab("Year") + geom_line()
+
+lineplot
 ```
 
 number of plants by type
 ```{r}
-numberOfPlants = powerplantsAfghanistanFuel %>% summarize(number = n())
-ggplot(numberOfPlants,aes(x="",y=number,fill=primary_fuel)) + geom_bar(width=1,stat="identity") + coord_polar("y",start=0) + scale_fill_manual(values=c("green","blue","red"))
+numberOfPlants = powerplantsUSAFuel %>% summarize(number = n())
+ggplot(numberOfPlants,aes(x=primary_fuel, y=number,fill=primary_fuel)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle=90))
+```
+
+```{r}
+
 ```

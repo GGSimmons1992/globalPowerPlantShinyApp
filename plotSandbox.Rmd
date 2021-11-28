@@ -29,11 +29,16 @@ powerplantsUSAFuelYear = powerplantsUSAFuel %>% summarise(energy2013 = 0.5* (sum
           energy2017 = 0.5* (sum(generation_gwh_2017) + sum(estimated_generation_gwh_2017)),
           )
 
+powerplantsUSAFuelYearDF = as.data.frame(powerplantsUSAFuelYear)
+powerplantsUSAFuelYearLabeled = powerplantsUSAFuelYearDF[,-1]
+row.names(powerplantsUSAFuelYearLabeled) = powerplantsUSAFuelYearDF[,1]
+transposePowerplantsUSAFuelYear = transpose(powerplantsUSAFuelYearLabeled)
+colnames(transposePowerplantsUSAFuelYear) = powerplantsUSAFuelYearDF[,1]
+transposePowerplantsUSAFuelYear$Year = c(2013,2014,2015,2016,2017)
+
+
 totalEnergy = powerplantsUSAFuelYear %>% mutate(total = energy2013+ energy2014 +energy2015 + energy2016 + energy2017)
 
-transposePowerplantsUSAFuelYear = transpose(powerplantsUSAFuelYear)
-transposePowerplantsUSAFuelYear$V4 = c("Year",2013,2014,2015,2016,2017)
-names(transposePowerplantsUSAFuelYear) = transposePowerplantsUSAFuelYear[1,]
 ```
 
 map
@@ -49,11 +54,10 @@ ggplot(totalEnergy,aes(x="",y=total,fill=primary_fuel)) + geom_bar(width=1,stat=
 energy produced
 ```{r}
 
-preplotdf=transposePowerplantsUSAFuelYear[-1,]
-data_long = melt(preplotdf, id="Year")
-data_long$value
+data_long = melt(transposePowerplantsUSAFuelYear, id="Year")
+colnames(data_long) = c("Year","primary_fuel","energy")
 
-lineplot = ggplot(data_long, aes(x=Year,y= value, color= variable,group=1)) + ylab("Energy Produce MWH") + xlab("Year") + geom_line()
+lineplot = ggplot(data_long, aes(x=Year,y=energy, color= primary_fuel)) + ylab("Energy Produce MWH") + xlab("Year") + geom_line()
 
 lineplot
 ```

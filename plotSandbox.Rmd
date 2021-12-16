@@ -7,11 +7,13 @@ data load
 library(dplyr)
 library(data.table)
 library(ggplot2)
+library(ggmap)
+library(RColorBrewer)
 library(leaflet)
-library(reshape2)
+
 powerplants=read.csv('global_power_plant_database.csv')
 
-powerplantsWithYearData = powerplants %>% group_by(country_long) %>% summarise(proportionWithData = 1 - mean(is.na(commissioning_year))) %>% filter(proportionWithData > .8)
+#powerplantsWithYearData = powerplants %>% group_by(country_long) %>% summarise(proportionWithData = 1 - mean(is.na(commissioning_year))) %>% filter(proportionWithData > .8)
 
 powerplants = powerplants %>% filter(country_long %in% powerplantsWithYearData$country_long)
 
@@ -43,7 +45,7 @@ totalEnergy = powerplantsUSAFuelYear %>% mutate(total = energy2013+ energy2014 +
 
 map
 ```{r}
-leaflet(powerplantsUSA %>% filter(primary_fuel == "Wind")) %>% addTiles() %>% addMarkers(~longitude,~latitude,popup= ~primary_fuel,label= ~primary_fuel)
+leaflet(powerplants %>% filter(primary_fuel == "Wind")) %>% addTiles() %>% addMarkers(~longitude,~latitude,popup= ~primary_fuel,label= ~name)
 ```
 
 pie chart

@@ -47,7 +47,8 @@ totalEnergy = powerplantsUSAFuelYear %>% mutate(total = energy2013+ energy2014 +
 
 map
 ```{r}
-leaflet(powerplants %>% filter(primary_fuel == "Wind")) %>% addTiles() %>% addMarkers(~longitude,~latitude,popup= ~primary_fuel,label= ~name)
+powertype = "Wind"
+leaflet(powerplants %>% filter(primary_fuel == powertype)) %>% addTiles() %>% addMarkers(~longitude,~latitude,popup= ~primary_fuel,label= ~name)
 ```
 
 Total energy bar chart
@@ -62,7 +63,7 @@ energy produced
 data_long = melt(transposePowerplantsUSAFuelYear, id="Year")
 colnames(data_long) = c("Year","primary_fuel","energy")
 
-lineplot = ggplot(data_long, aes(x=Year,y=energy, color= primary_fuel)) + ylab("Energy Produced MWH") + xlab("Year") + geom_line() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x)))
+lineplot = ggplot(data_long, aes(x=Year,y=energy, color= primary_fuel)) + ylab("Energy Produced MWH") + xlab("Year") + geom_line() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) +ggtitle("Energy Produced over the Years per Type")
 
 ggplotly(lineplot)
 ```
@@ -70,7 +71,7 @@ ggplotly(lineplot)
 number of plants by type
 ```{r}
 numberOfPlants = powerplantsUSAFuel %>% summarize(number = n())
-ggplot(numberOfPlants,aes(x=reorder(primary_fuel,number), y=number,fill=primary_fuel)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle=90)) + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + xlab("Primary Fuel") + ylab("Number of Plants")
+ggplot(numberOfPlants,aes(x=reorder(primary_fuel,number), y=number,fill=primary_fuel)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle=90)) + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + xlab("Primary Fuel") + ylab("Number of Plants") +ggtitle("Number of Plants per Type")
 ```
 
 ```{r}

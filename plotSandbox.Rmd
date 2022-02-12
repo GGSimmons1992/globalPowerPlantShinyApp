@@ -10,6 +10,8 @@ library(ggplot2)
 library(ggmap)
 library(RColorBrewer)
 library(leaflet)
+library(scales)
+library(plotly)
 
 powerplants=read.csv('global_power_plant_database.csv')
 
@@ -48,9 +50,10 @@ map
 leaflet(powerplants %>% filter(primary_fuel == "Wind")) %>% addTiles() %>% addMarkers(~longitude,~latitude,popup= ~primary_fuel,label= ~name)
 ```
 
-pie chart
+Total energy bar chart
 ```{r}
-ggplot(totalEnergy,aes(x="",y=total,fill=primary_fuel)) + geom_bar(width=1,stat="identity") + coord_polar("y",start=0)
+totalEnergyChart=ggplot(totalEnergy,aes(x=reorder(primary_fuel,total),y=total,fill=primary_fuel)) + geom_bar(stat="identity") + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + theme(axis.text.x = element_text(angle=90)) + ylab("Energy Accumulated MWH") + xlab("Primary Fuel")
+totalEnergyChart
 ```
 
 energy produced
@@ -59,15 +62,15 @@ energy produced
 data_long = melt(transposePowerplantsUSAFuelYear, id="Year")
 colnames(data_long) = c("Year","primary_fuel","energy")
 
-lineplot = ggplot(data_long, aes(x=Year,y=energy, color= primary_fuel)) + ylab("Energy Produce MWH") + xlab("Year") + geom_line()
+lineplot = ggplot(data_long, aes(x=Year,y=energy, color= primary_fuel)) + ylab("Energy Produced MWH") + xlab("Year") + geom_line() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x)))
 
-lineplot
+ggplotly(lineplot)
 ```
 
 number of plants by type
 ```{r}
 numberOfPlants = powerplantsUSAFuel %>% summarize(number = n())
-ggplot(numberOfPlants,aes(x=primary_fuel, y=number,fill=primary_fuel)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle=90))
+ggplot(numberOfPlants,aes(x=reorder(primary_fuel,number), y=number,fill=primary_fuel)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle=90)) + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + xlab("Primary Fuel") + ylab("Number of Plants")
 ```
 
 ```{r}

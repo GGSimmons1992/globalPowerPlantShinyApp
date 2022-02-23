@@ -5,27 +5,29 @@ dashboardPage(
   dashboardSidebar(
     sidebarUserPanel("GGSimmons1992",image="GGS_GK.jpeg"),
     sidebarMenu(
-      radioButtons(
-        inputId="tabselected",label="View by",
-        choices=c("Country","Company")
-      )
-    ),
-    conditionalPanel(condition = 'input.tabselected == "Country"',
-                     selectizeInput(inputId="country_long",
-                                    label='country',
-                                    choice= unique(powerplants$country_long))
-    ),
-    conditionalPanel(condition = 'input.tabselected == "Company"',
-                     selectizeInput(inputId="owner",
-                                    label='company',
-                                    choice= unique(powerplants$owner))
+      menuItem("Country energy info",tabName = "Country", icon=icon("flag")),
+      menuItem("Selected Fuel Type Locations",
+               tabName = "Type",
+               icon=icon("map"))
     )
     
   ),
   dashboardBody(
     tabItems(
-      tabItem(tabName='Country'),
-      tabItem(tabName = "Company")
+      tabItem(tabName = "Type",
+              selectizeInput(inputId="type",
+                             label='fuel type',
+                             choice= unique(powerplants$primary_fuel)),
+              fluidRow(
+                leafletOutput("map")
+              )
+      ),
+      tabItem(tabName='Country',
+              selectizeInput(inputId="country_long",
+                                    label='country',
+                                    choice= unique(powerplants$country_long))
+      
+      )
     )
   )
 )

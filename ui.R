@@ -25,7 +25,16 @@ dashboardPage(
       tabItem(tabName='Country',
               selectizeInput(inputId="country_long",
                                     label='country',
-                                    choice= unique(powerplants$country_long))
+                                    choice= unique(powerplants$country_long)),
+              fluidRow(
+                plotOutput("totalEnergy")
+              ),
+              fluidRow(
+                plotlyOutput("time")
+              ),
+              fluidRow(
+                plotOutput("numberOfPlants")
+              )
       
       )
     )

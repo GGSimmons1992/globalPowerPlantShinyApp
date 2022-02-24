@@ -8,6 +8,4 @@ library(scales)
 library(plotly)
 
 powerplants=read.csv('global_power_plant_database.csv')
-
-powerplants = powerplants %>% filter(country_long %in% powerplantsWithYearData$country_long)
 powerplants[is.na(powerplants)] = 0

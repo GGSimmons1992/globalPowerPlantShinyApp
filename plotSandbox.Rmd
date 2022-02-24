@@ -15,10 +15,6 @@ library(plotly)
 
 powerplants=read.csv('global_power_plant_database.csv')
 
-#powerplantsWithYearData = powerplants %>% group_by(country_long) %>% summarise(proportionWithData = 1 - mean(is.na(commissioning_year))) %>% filter(proportionWithData > .8)
-
-powerplants = powerplants %>% filter(country_long %in% powerplantsWithYearData$country_long)
-
 powerplants[is.na(powerplants)] = 0
 powerplantsUSA = powerplants %>% filter(country_long == "United States of America")
 ```

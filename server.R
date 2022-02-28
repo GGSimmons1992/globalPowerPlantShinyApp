@@ -4,11 +4,20 @@ library(ggplot2)
 library(leaflet)
 
 function(input, output){
-  retrievePowerplantCountryFuelYear = reactive({
+  
+  retrievePowerplantType = reactive({
+    powerplantbytype = powerplants %>% 
+      filter(primary_fuel == input$type)
+  })
+  
+  retrievePowerplantCountryFuel = reactive({
     powerplantbycountry = powerplants %>% 
       filter(country_long == input$country_long)
-    powerplantsCountryFuel = powerplantbycountry %>% group_by(primary_fuel) 
-    
+    powerplantsCountryFuel = powerplantbycountry %>% group_by(primary_fuel)
+  })
+  
+  retrievePowerplantCountryFuelYear = reactive({
+    powerplantsCountryFuel = retrievePowerplantCountryFuel()
     powerplantsCountryFuelYear = powerplantsCountryFuel %>% 
       summarise(energy2013 = 0.5* (sum(generation_gwh_2013) + 
                                      sum(estimated_generation_gwh_2013)),
@@ -22,10 +31,6 @@ function(input, output){
                                      sum(estimated_generation_gwh_2017)),
     )
       
-  })
-  
-  retrievePowerplantType = reactive({
-    powerplantbytype = powerplants %>% filter(primary_fuel == input$type)
   })
   
   retrievePowerplantTotalEnergy = reactive({
@@ -48,7 +53,7 @@ function(input, output){
   })
   
   retrieveNumberOfPlantsPerType = reactive({
-     retrievePowerplantCountryFuelYear() %>% summarize(number = n())
+    numberOfPlantsPerType = retrievePowerplantCountryFuel() %>% summarize(number = n())
   })
   
   output$map = renderLeaflet({
@@ -60,7 +65,7 @@ function(input, output){
   
   output$totalEnergy = renderPlot({
     retrievePowerplantTotalEnergy() %>%
-      ggplot(totalEnergy,mapping=aes(x=reorder(primary_fuel,total),
+      ggplot(mapping=aes(x=reorder(primary_fuel,total),
                              y=total,fill=primary_fuel)) + 
       geom_bar(stat="identity") + coord_flip() + 
       scale_y_continuous(trans= 'log10', 
@@ -82,7 +87,7 @@ function(input, output){
              )
   })
   output$numberOfPlants = renderPlot({
-    retrieveNumberOfPlantsPerType() %>%
+      retrieveNumberOfPlantsPerType() %>% 
       ggplot(mapping=aes(x=reorder(primary_fuel,number), 
                  y=number,fill=primary_fuel)) + 
       geom_bar(stat="identity") + theme(axis.text.x = element_text(angle=90)) +

@@ -16,28 +16,28 @@ library(plotly)
 powerplants=read.csv('global_power_plant_database.csv')
 
 powerplants[is.na(powerplants)] = 0
-powerplantsUSA = powerplants %>% filter(country_long == "United States of America")
+powerplantsCountry = powerplants %>% filter(country_long == "United Kingdom")
 ```
 Data prep
 ```{r}
-powerplantsUSAFuel = powerplantsUSA %>% group_by(primary_fuel) 
+powerplantsCountryFuel = powerplantsCountry %>% group_by(primary_fuel) 
 
-powerplantsUSAFuelYear = powerplantsUSAFuel %>% summarise(energy2013 = 0.5* (sum(generation_gwh_2013) + sum(estimated_generation_gwh_2013)),
+powerplantsCountryFuelYear = powerplantsCountryFuel %>% summarise(energy2013 = 0.5* (sum(generation_gwh_2013) + sum(estimated_generation_gwh_2013)),
           energy2014 = 0.5* (sum(generation_gwh_2014) + sum(estimated_generation_gwh_2014)),
           energy2015 = 0.5* (sum(generation_gwh_2015) + sum(estimated_generation_gwh_2015)),
           energy2016 = 0.5* (sum(generation_gwh_2016) + sum(estimated_generation_gwh_2016)),
           energy2017 = 0.5* (sum(generation_gwh_2017) + sum(estimated_generation_gwh_2017)),
           )
 
-powerplantsUSAFuelYearDF = as.data.frame(powerplantsUSAFuelYear)
-powerplantsUSAFuelYearLabeled = powerplantsUSAFuelYearDF[,-1]
-row.names(powerplantsUSAFuelYearLabeled) = powerplantsUSAFuelYearDF[,1]
-transposePowerplantsUSAFuelYear = transpose(powerplantsUSAFuelYearLabeled)
-colnames(transposePowerplantsUSAFuelYear) = powerplantsUSAFuelYearDF[,1]
-transposePowerplantsUSAFuelYear$Year = c(2013,2014,2015,2016,2017)
+powerplantsCountryFuelYearDF = as.data.frame(powerplantsCountryFuelYear)
+powerplantsCountryFuelYearLabeled = powerplantsCountryFuelYearDF[,-1]
+row.names(powerplantsCountryFuelYearLabeled) = powerplantsCountryFuelYearDF[,1]
+transposePowerplantsCountryFuelYear = transpose(powerplantsCountryFuelYearLabeled)
+colnames(transposePowerplantsCountryFuelYear) = powerplantsCountryFuelYearDF[,1]
+transposePowerplantsCountryFuelYear$Year = c(2013,2014,2015,2016,2017)
 
 
-totalEnergy = powerplantsUSAFuelYear %>% mutate(total = energy2013+ energy2014 +energy2015 + energy2016 + energy2017)
+totalEnergy = powerplantsCountryFuelYear %>% mutate(total = energy2013+ energy2014 +energy2015 + energy2016 + energy2017)
 
 ```
 
@@ -56,7 +56,7 @@ totalEnergyChart
 energy produced
 ```{r}
 
-data_long = melt(transposePowerplantsUSAFuelYear, id="Year")
+data_long = melt(transposePowerplantsCountryFuelYear, id="Year")
 colnames(data_long) = c("Year","primary_fuel","energy")
 
 lineplot = ggplot(data_long, aes(x=Year,y=energy, color= primary_fuel)) + ylab("Energy Produced MWH") + xlab("Year") + geom_line() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) +ggtitle("Energy Produced over the Years per Type")
@@ -66,7 +66,7 @@ ggplotly(lineplot)
 
 number of plants by type
 ```{r}
-numberOfPlants = powerplantsUSAFuel %>% summarize(number = n())
+numberOfPlants = powerplantsCountryFuel %>% summarize(number = n())
 ggplot(numberOfPlants,aes(x=reorder(primary_fuel,number), y=number,fill=primary_fuel)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle=90)) + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + xlab("Primary Fuel") + ylab("Number of Plants") +ggtitle("Number of Plants per Type")
 ```
 

@@ -49,7 +49,7 @@ function(input, output){
     transposePowerplantsCountryFuelYear$Year = c(2013,2014,2015,2016,2017)
     data_long= melt(transposePowerplantsCountryFuelYear, id="Year")
     colnames(data_long) = c("Year","primary_fuel","energy")
-    data_long
+    data_long = data_long %>% filter(energy > 0)
   })
   
   retrieveNumberOfPlantsPerType = reactive({
@@ -77,12 +77,12 @@ function(input, output){
   output$time = renderPlotly({
     retrievePowerplantDataLong() %>% 
       plot_ly(x=~Year,y=~energy, color= ~primary_fuel,
-              type = 'scatter',mode="lines") %>%
+              mode="lines") %>%
       layout(title="Energy Produced over the Years per Type",
              xaxis=list(title = "Year",
                         zeroline = FALSE),
              yaxis=list(title = "Energy Produced MWH",
-                        zeroline = FALSE,
+                        zeroline = TRUE,
                         type='log')
              )
   })

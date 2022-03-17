@@ -60,7 +60,7 @@ function(input, output){
     retrievePowerplantType() %>%  
     leaflet() %>%
     addTiles() %>% 
-    addMarkers(~longitude,~latitude,popup= ~primary_fuel,label= ~name)
+    addMarkers(~longitude,~latitude,popup= ~primary_fuel,label= ~country_long)
   })
   
   output$totalEnergy = renderPlot({

@@ -16,7 +16,7 @@ library(plotly)
 powerplants=read.csv('global_power_plant_database.csv')
 
 powerplants[is.na(powerplants)] = 0
-powerplantsCountry = powerplants %>% filter(country_long == "United Kingdom")
+powerplantsCountry = powerplants %>% filter(country_long == "United States of America")
 ```
 Data prep
 ```{r}
@@ -71,5 +71,9 @@ ggplot(numberOfPlants,aes(x=reorder(primary_fuel,number), y=number,fill=primary_
 ```
 
 ```{r}
+powerplantsCountryFuelAndNumber = merge(totalEnergy,numberOfPlants,"primary_fuel","primary_fuel")
+powerplantsCountryFuelAndNumber = powerplantsCountryFuelAndNumber %>% mutate(EnergyPerPlant = total/number)
 
+totalEnergyPerPlantChart=ggplot(powerplantsCountryFuelAndNumber,aes(x=reorder(primary_fuel,EnergyPerPlant),y=EnergyPerPlant,fill=primary_fuel)) + geom_bar(stat="identity") + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + theme(axis.text.x = element_text(angle=90)) + ylab("Average Energy Accumulated MWH per Plant") + xlab("Primary Fuel")
+totalEnergyPerPlantChart
 ```

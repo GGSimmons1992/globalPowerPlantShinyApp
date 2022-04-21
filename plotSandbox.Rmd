@@ -77,3 +77,17 @@ powerplantsCountryFuelAndNumber = powerplantsCountryFuelAndNumber %>% mutate(Ene
 totalEnergyPerPlantChart=ggplot(powerplantsCountryFuelAndNumber,aes(x=reorder(primary_fuel,EnergyPerPlant),y=EnergyPerPlant,fill=primary_fuel)) + geom_bar(stat="identity") + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + theme(axis.text.x = element_text(angle=90)) + ylab("Average Energy Accumulated MWH per Plant") + xlab("Primary Fuel")
 totalEnergyPerPlantChart
 ```
+
+```{r}
+powerplantsCountryFuelTotal = powerplantsCountryFuel %>%
+  mutate(totalEnergy = 0.5 * (
+    generation_gwh_2013 + estimated_generation_gwh_2013 +
+    generation_gwh_2014 + estimated_generation_gwh_2014 +
+    generation_gwh_2015 + estimated_generation_gwh_2015 +
+    generation_gwh_2016 + estimated_generation_gwh_2016 +
+    generation_gwh_2017 + estimated_generation_gwh_2017
+    ))
+totalEnergyBoxPlot = ggplot(powerplantsCountryFuelTotal,aes(x=reorder(primary_fuel,totalEnergy),y=totalEnergy,fill=primary_fuel)) + geom_boxplot() +
+  theme(legend.position = "right") + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + theme(axis.text.x = element_text(angle=90)) + ylab("Average Energy Accumulated MWH per Plant") + xlab("Primary Fuel")
+totalEnergyBoxPlot
+```

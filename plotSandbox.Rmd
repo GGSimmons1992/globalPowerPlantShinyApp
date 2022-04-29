@@ -12,6 +12,8 @@ library(RColorBrewer)
 library(leaflet)
 library(scales)
 library(plotly)
+library(rlist)
+library(broom)
 
 powerplants=read.csv('global_power_plant_database.csv')
 
@@ -87,7 +89,19 @@ powerplantsCountryFuelTotal = powerplantsCountryFuel %>%
     generation_gwh_2016 + estimated_generation_gwh_2016 +
     generation_gwh_2017 + estimated_generation_gwh_2017
     ))
-totalEnergyBoxPlot = ggplot(powerplantsCountryFuelTotal,aes(x=reorder(primary_fuel,totalEnergy),y=totalEnergy,fill=primary_fuel)) + geom_boxplot() +
-  theme(legend.position = "right") + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + theme(axis.text.x = element_text(angle=90)) + ylab("Average Energy Accumulated MWH per Plant") + xlab("Primary Fuel")
+totalEnergyBoxPlot = ggplot(powerplantsCountryFuelTotal,aes(x=reorder(primary_fuel,totalEnergy),y=totalEnergy,fill=primary_fuel)) + geom_boxplot(show.legend = FALSE) + coord_flip() + scale_y_continuous(trans= 'log10', labels = trans_format('log10',math_format(10^.x))) + theme(axis.text.x = element_text(angle=90)) + ylab("Average Energy Accumulated MWH per Plant") + xlab("Primary Fuel")
 totalEnergyBoxPlot
+```
+```{r}
+windPowerplants = powerplantsCountryFuelTotal %>% filter(primary_fuel == "Wind")
+oilPowerplants = powerplantsCountryFuelTotal %>% filter(primary_fuel == "Oil")
+
+# Compute the analysis of variance
+res.aov <- aov(totalEnergy ~ primary_fuel, data = powerplantsCountryFuelTotal)
+# Summary of the analysis
+summary(res.aov)
+```
+```{r}
+thsd = TukeyHSD(res.aov, "primary_fuel", ordered = TRUE)
+tidy(thsd) %>% filter(contrast=="Wind-Oil")
 ```
